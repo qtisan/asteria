@@ -1,4 +1,4 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(name='asteria',
       version='1.0',
@@ -8,8 +8,5 @@ setup(name='asteria',
       author='Lennon QIAN',
       author_email='qtisan@hotmail.com',
       url='https://github.com/qtisan/asteria.git',
-      packages=['asteria'],
-      scripts=[
-          'scripts/run',
-          'scripts/test',
-      ])
+      packages=find_packages(),
+      scripts=['scripts/run', 'scripts/test'])
