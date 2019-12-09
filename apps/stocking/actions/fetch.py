@@ -3,8 +3,13 @@ import execjs
 import moment
 import pandas as pd
 import requests
-from io import BytesIO
 from apps.stocking import logger
+from utils.common import get_file_modify_time, is_expire
+from pathlib import Path
+import os
+import io
+
+from apps.stocking.meta import CACHED_ROOT
 
 # sina
 # =========================================
@@ -19,6 +24,24 @@ from apps.stocking import logger
 #          date  close   high    low   open   yest  turnover    volumn        amount         total        circul
 # 0  2019-11-28  11.93  12.19  11.85  12.00  12.08    0.5385   8470873  1.015543e+08  1.876724e+10  1.876724e+10
 # 1  2019-11-27  12.08  12.33  11.96  12.28  12.01    0.9251  14553516  1.768222e+08  1.900320e+10  1.900320e+10
+
+
+def path_of(code: str):
+    return CACHED_ROOT / '{0}.csv'.format(code)
+
+
+def read_cached_data(code: str):
+    data = None
+    filepath = path_of(code)
+    if not filepath.exists():
+        return data
+    mtime = get_file_modify_time(filepath)
+    logger.debug('Cached data last updated: {0}'.format(
+        mtime.format('YYYY-MM-DD HH:mm:ss')))
+    if not is_expire(mtime, span=0.5):
+        logger.debug('Cached data not expired.({0})'.format(filepath))
+        data = pd.read_csv(filepath, index_col=0)
+    return data
 
 
 def make_sina_url(code: str, page=1, num=4000):
@@ -59,6 +82,7 @@ def fetch_data(code: str):
     '''
     str: sh600765, sz000232, etc...
     '''
+    logger.debug('Cached data expired or not exists, fetching from websites...')
     data_sina: pd.DataFrame = None
     data_ne: pd.DataFrame = None
     sina_url, ne_url = make_url(code)
@@ -73,7 +97,7 @@ def fetch_data(code: str):
             'opendate', 'code', 'name', 'close', 'high', 'low', 'open', 'yest',
             'volumn', 'amount', 'total', 'circul'
         ]
-        data_ne = pd.read_csv(BytesIO(res.text.encode('utf-8')),
+        data_ne = pd.read_csv(io.BytesIO(res.text.encode('utf-8')),
                               header=0,
                               names=names,
                               usecols=[0, *range(3, 12)],
@@ -82,12 +106,25 @@ def fetch_data(code: str):
         logger.error(ex)
         return None
 
-    return date_indexed_compose(data_sina, data_ne)
+    ds = date_indexed_compose(data_sina, data_ne)
+    filepath = path_of(code)
+    ds.to_csv(filepath)
+
+    return ds
 
 
 def date_indexed_compose(sina: pd.DataFrame, ne: pd.DataFrame):
     ds = pd.merge(sina, ne, on='opendate')
     ds = ds.fillna(method='bfill')
+    ds = ds.fillna(method='ffill')
     ds = ds.replace(0., method='bfill')
+    ds = ds.replace(0., method='ffill')
 
     return ds
+
+
+def fetch(code: str, *args, **kwargs):
+    data = read_cached_data(code)
+    if data is not None:
+        return data
+    return fetch_data(code)
