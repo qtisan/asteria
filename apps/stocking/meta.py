@@ -4,12 +4,14 @@ import numpy as np
 CACHED_ROOT = Path(__file__).parent / 'data/original'
 TRAINED_ROOT = Path(__file__).parent / 'data/trained'
 
-y_dict_name = {0: '下跌', 1: '涨0-3个点', 2: '涨3-10个点', 3: '涨超10个点'}
+y_dict_name = {0: '下跌', 1: '涨0-3个点', 2: '涨3-6个点', 3: '涨6-10个点', 4: '涨超10个点'}
 
 
 def categorify_y(y_value):
     c = 0
     if y_value > 0.1:
+        c = 4
+    elif y_value > 0.06:
         c = 3
     elif y_value > 0.03:
         c = 2

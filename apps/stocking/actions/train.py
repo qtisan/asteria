@@ -16,7 +16,7 @@ def train(x,
           **kwargs):
 
     logger.debug('Preprocessing data with {0}...'.format(pre_process.__name__))
-    x, y, x_latest = pre_process(x, y, x_latest)
+    clf, x, y, x_latest = pre_process(clf, x, y, x_latest)
 
     if param_grid is not None:
         clf = GridSearchCV(clf, param_grid)
@@ -36,7 +36,8 @@ def train(x,
         best_estimator = clf.best_estimator_
     logger.debug('Test score: {0:.2f}%'.format(score * 100))
     if param_grid is not None:
-        logger.debug('Test best score: {0:.2f}%'.format(best_score * 100))
+        logger.debug('Best score: {0:.2f}%'.format(best_score * 100))
+        logger.debug('Best params: {0}'.format(str(clf.best_params_)))
     y_valid = best_estimator.predict(x)
     yvy = y_valid <= y
     smaller_rate = np.mean(yvy)

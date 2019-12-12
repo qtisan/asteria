@@ -1,0 +1,51 @@
+{
+    "name": "temp",
+    "code": "sz002690",
+    "time": "2019-12-12 11:30:15",
+    "features": [
+        "netamount_chg_1",
+        "ratioamount_chg_1",
+        "r0_net_chg_1",
+        "r0_ratio_chg_1",
+        "r0x_ratio",
+        "r0x_ratio__4",
+        "close_chg_1",
+        "high_chg_1",
+        "high_chg_3",
+        "high_chg_5",
+        "low_chg_1",
+        "low_chg_2",
+        "low_chg_5",
+        "open_chg_3",
+        "yest_chg_3",
+        "turnover__3",
+        "circul_chg_10",
+        "volumn__4",
+        "low_chg_1",
+        "low__3"
+    ],
+    "past_days": 5,
+    "future_days": 10,
+    "test_size": 0.05,
+    "random_state": 29,
+    "feature_pows": [
+        2,
+        3,
+        4
+    ],
+    "feature_chgs": [
+        1,
+        2,
+        3,
+        5,
+        10
+    ],
+    "zeros_copy_days": 10,
+    "classifier": "RandomForestClassifier",
+    "results": {
+        "classifier": "RandomForestClassifier(bootstrap=True, ccp_alpha=0.0, class_weight=None,\n                       criterion='gini', max_depth=100, max_features='auto',\n                       max_leaf_nodes=None, max_samples=None,\n                       min_impurity_decrease=0.0, min_impurity_split=None,\n                       min_samples_leaf=1, min_samples_split=5,\n                       min_weight_fraction_leaf=0.0, n_estimators=2000,\n                       n_jobs=None, oob_score=False, random_state=None,\n                       verbose=0, warm_start=False)",
+        "score": 0.4044943820224719,
+        "smaller_rate": 0.9808558558558559,
+        "latest_prediction": "{\"2019-12-11\":{\"prediction_sz002690\":\"10d \u6da86-10\u4e2a\u70b9\",\"current_sz002690\":\"10d \u4e0b\u8dcc\"},\"2019-12-10\":{\"prediction_sz002690\":\"10d \u6da86-10\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da80-3\u4e2a\u70b9\"},\"2019-12-09\":{\"prediction_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da86-10\u4e2a\u70b9\"},\"2019-12-06\":{\"prediction_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da83-6\u4e2a\u70b9\"},\"2019-12-05\":{\"prediction_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da83-6\u4e2a\u70b9\"},\"2019-12-04\":{\"prediction_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da83-6\u4e2a\u70b9\"},\"2019-12-03\":{\"prediction_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da83-6\u4e2a\u70b9\"},\"2019-12-02\":{\"prediction_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da86-10\u4e2a\u70b9\"},\"2019-11-29\":{\"prediction_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da86-10\u4e2a\u70b9\"},\"2019-11-28\":{\"prediction_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\",\"current_sz002690\":\"10d \u6da8\u8d8510\u4e2a\u70b9\"}}"
+    }
+}
