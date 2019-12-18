@@ -1,0 +1,136 @@
+{
+    "stocks": [
+        "sz000789",
+        "sh601933",
+        "sz002415",
+        "sz002372",
+        "sz002832",
+        "sh600004",
+        "sh600009",
+        "sh600011",
+        "sh600012",
+        "sh600029",
+        "sh600030",
+        "sh600036",
+        "sh600048",
+        "sh600050",
+        "sh600061",
+        "sh600111",
+        "sh600177",
+        "sh600309",
+        "sh600350",
+        "sh600535",
+        "sh600588",
+        "sh600606",
+        "sh600845",
+        "sh600887",
+        "sh601006",
+        "sh601857",
+        "sh601877",
+        "sz000338",
+        "sz002340",
+        "sz002475",
+        "sz002690"
+    ],
+    "features": [
+        "close_chg_1",
+        "close_chg_2",
+        "close_chg_3",
+        "close_chg_5",
+        "netamount_chg_1",
+        "ratioamount_chg_1",
+        "r0_net_chg_1",
+        "r0_ratio_chg_1",
+        "r0x_ratio",
+        "r0x_ratio__3",
+        "close_chg_1",
+        "high_chg_1",
+        "high_chg_3",
+        "high_chg_5",
+        "low_chg_1",
+        "low_chg_2",
+        "low_chg_5",
+        "open_chg_3",
+        "yest_chg_3",
+        "turnover__3",
+        "turnover_chg_1",
+        "turnover_chg_2",
+        "turnover_chg_3",
+        "turnover_chg_5",
+        "turnover_chg_10",
+        "circul_chg_10",
+        "volume__3",
+        "low_chg_1",
+        "low__3"
+    ],
+    "features_all": false,
+    "past_days": 5,
+    "future_days": 5,
+    "test_size": 0.08,
+    "random_state": 29,
+    "feature_pows": [
+        2,
+        3
+    ],
+    "feature_chgs": [
+        1,
+        2,
+        3,
+        5,
+        10
+    ],
+    "zeros_copy_days": 10,
+    "classifier": "RandomForestClassifier",
+    "y_dict": [
+        {
+            "name": "下跌",
+            "threshold": -99999
+        },
+        {
+            "name": "涨0-3%",
+            "threshold": 0
+        },
+        {
+            "name": "涨3-6%",
+            "threshold": 0.03
+        },
+        {
+            "name": "涨6-10%",
+            "threshold": 0.06
+        },
+        {
+            "name": "涨超10%",
+            "threshold": 0.1
+        }
+    ],
+    "x_dict": {
+        "netamount": "净流入",
+        "ratioamount": "净流入率",
+        "r0_net": "主力净流入",
+        "r0_ratio": "主力净流入率",
+        "r0x_ratio": "主力罗盘",
+        "cnt_r0x_ratio": "主力朝向",
+        "cate_ra": "RA",
+        "cate_na": "NA",
+        "close": "收盘价",
+        "high": "最高值",
+        "low": "最低值",
+        "open": "开盘价",
+        "yest": "昨收价",
+        "turnover": "换手率",
+        "volume": "成交量",
+        "amount": "成交额",
+        "total": "总市值",
+        "circul": "流通值"
+    },
+    "x_dict_extra": [
+        {
+            "name": "{0}{1}次方",
+            "suffix": "^(feature)__(\\d*)$"
+        },
+        {
+            "name": "{0}前{1}天变动",
+            "suffix": "^(feature)_chg_(\\d*)$"
+        }
+    ]
+}

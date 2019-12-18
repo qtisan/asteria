@@ -1,0 +1,39 @@
+<!doctype html>
+<title>{% block title %}{% endblock %} - ASTERIA</title>
+<link rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}?_={{timestamp()}}">
+<script
+    src="https://cdn.bootcss.com/echarts/4.4.0-rc.1/echarts.min.js"></script>
+<nav>
+    <h1>ASTERIA</h1>
+    {% set cate = cates() %}
+    <ul class="cates">
+        <li><a href="{{ '#' if cate == 'stocking' else '/stocking' }}"
+                class="{{ 'active' if cate == 'stocking' else '' }}">STOCKING</a>
+        </li>
+        <li><a href="{{ '#' if cate == 'about' else '/about' }}"
+                class="{{ 'active' if cate == 'about' else '' }}">ABOUT</a>
+        </li>
+    </ul>
+    <ul class="guides">
+        {% if g.user %}
+        <li><span>{{ g.user['username'] }}</span></li>
+        <li><a href="{{ url_for('auth.logout') }}">Log Out</a></li>
+        {% else %}
+        <li><a href="{{ url_for('auth.register') }}">Register</a></li>
+        <li><a href="{{ url_for('auth.login') }}">Log In</a></li>
+        {% endif %}
+    </ul>
+</nav>
+<section class="content">
+    <header>
+        {% block header %}{% endblock %}
+    </header>
+    {% for message in get_flashed_messages() %}
+    <div class="flash">{{ message }}</div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+</section>
+<script type="text/javascript">
+    console.log('')
+</script>

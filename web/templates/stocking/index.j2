@@ -1,0 +1,340 @@
+{% extends 'base.j2' %}
+
+{% block header %}
+<h1>{{ title }}</h1>
+{% endblock header  %}
+
+{% block content %}
+<div class="wrapped">
+    <div class="sidenav">
+        <div class="header">Stocks</div>
+        <ul class="items">
+            {% for stock in stocks %}
+            {% if stock == 'all' %}
+
+            <li class="item">
+                <a href="{{ '#' if code is not defined else '/stocking' }}"
+                    class="{{ 'active' if code is not defined else '' }}">{{ stock }}</a>
+            </li>
+            {% else %}
+            <li class="item">
+                <a href="{{ '#' if code == stock else '/stocking/{0}'.format(stock) }}"
+                    class="{{ 'active' if code == stock else '' }}">{{ stock }}</a>
+            </li>
+            {% endif %}
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="main-content">
+        {% if infos is defined %}
+        <h1>{{ infos.code }}&nbsp;({{ infos.time }})</h1>
+        <p><code>{{ infos.classifier }}</code>算法，计算过去<em>{{ infos.past_days }}</em>交易日数据，预测未来<em>{{ infos.future_days }}</em>交易日最高价较当天收盘价变化幅度。
+        </p>
+        <h5>预测因子：</h5>
+        <p>
+            {% for ft in infos.results.feature_names %}
+            <em style="font-size: .6rem;">{{ ft }}</em> |
+            {% endfor %}
+        </p>
+        <h5>
+            样本数量（验证集/全集）：<em>{{ infos.results.sample_num }}/{{ (infos.results.sample_num*infos.test_size)|int }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            验证准确率：<em>{{ '%.2f%%' | format(infos.results.score*100) }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            实际超出预测比率（验证集/全集）：<em>{{ '%.2f%%' | format(infos.results.smaller_rate*100) }}/{{ '%.2f%%' | format(infos.results.smaller_rate_all*100) }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </h5>
+        <div class="details">
+            <div id="de-table"></div>
+            <div id="de-diagram"></div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% if kdata is defined %}
+<script type="text/javascript">
+    var kdata = JSON.parse('{{ kdata | tojson }}'.replace(/NaN/gi, '0'));
+    var infos = JSON.parse('{{ infos | tojson }}'.replace(/\\n/gi, ''));
+    var yDict = JSON.parse('{{ y_dict | tojson }}');
+
+    var yCloses = kdata.values.map(function (y) { return y[1] });
+    var yAssist = [];
+    var y_vs = kdata.y_vs, y_cs = kdata.y_cs;
+    for (var i = 0; i < yCloses.length; i++) {
+        yAssist.push([yCloses[i], y_vs[i], yCloses[i], y_vs[i], y_cs[i]])
+    }
+
+    var myChart = echarts.init(document.getElementById('de-diagram'));
+    var upColor = '#f02a0c';
+    var downColor = '#0cd030';
+    var upBorderColor = '#8A0000';
+    var downBorderColor = '#008F28';
+
+    var option = {
+        title: {
+            text: '日K线走势对比图'
+        },
+        animation: false,
+        tooltip: {
+            trigger: 'axis',
+            axisPointer: {
+                type: 'cross'
+            },
+            backgroundColor: 'rgba(245, 245, 245, 0.8)',
+            borderWidth: 1,
+            borderColor: '#ccc',
+            padding: 10,
+            textStyle: {
+                color: '#000'
+            },
+            position: function (pos, params, el, elRect, size) {
+                var obj = { top: 10 };
+                obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+                return obj;
+            },
+            formatter: function (param) {
+                var val = param.find(function (p) { return p.seriesIndex == 0 });
+                var vol = param.find(function (p) { return p.seriesIndex == 1 });
+                var yas = param.find(function (p) { return p.seriesIndex == 2 });
+                var rans = param.find(function (p) { return p.seriesIndex == 3 });
+                var preds = param.find(function (p) { return p.seriesIndex == 4 });
+                var chg = (val.data[2] - val.data[5]) / val.data[5] * 100;
+                var clr = chg > 0 ? upColor : downColor;
+                var clrs = [];
+                for (var i = 1; i < 5; i++) {
+                    clrs[i] = val.data[i] - val.data[5] > 0 ? upColor : downColor;
+                }
+                var clry = yas.data[2] - yas.data[1] > 0 ? upColor : downColor;
+                return [
+                    '日期: ' + val.name + '<hr size=1 style="margin: 3px 0">',
+                    '开盘: <span style="color:' + clrs[1] + '">' + val.data[1] + '</span><br/>',
+                    '收盘: <span style="color:' + clrs[2] + '">' + val.data[2] + '</span><br/>',
+                    '最低: <span style="color:' + clrs[3] + '">' + val.data[3] + '</span><br/>',
+                    '最高: <span style="color:' + clrs[4] + '">' + val.data[4] + '</span><br/>',
+                    '昨收: ' + val.data[5] + '<br/>',
+                    '涨跌: <span style="color:' + clr + '">' + chg.toFixed(2) + '%</span><br/>',
+                    '成交量: ' + vol.data[1] + '<hr size=1 style="margin: 8px 0">',
+                    '收盘/' + infos.future_days + '天最高: <span style="color:' + clrs[2] + '">' + yas.data[1] + '</span>/',
+                    '<span style="color:' + clry + '">' + yas.data[2] + '</span><br/>',
+                    '涨跌: <span style="color:' + clry + '">' + yas.data[5] + '</span><br/>',
+                    '<hr size=1 style="margin: 5px 0">',
+                    '预测: <span style="color:' + clry + '">' + yDict[preds.data].name + '</span><br/>',
+                    '实际: <span style="color:' + clry + '">' + yDict[rans.data].name + '</span><br/>'
+                ].join('');
+            }
+        },
+        axisPointer: {
+            link: { xAxisIndex: 'all' },
+            label: {
+                backgroundColor: '#777'
+            }
+        },
+        visualMap: {
+            show: false,
+            seriesIndex: 1,
+            dimension: 2,
+            pieces: [{
+                value: -1,
+                color: downColor
+            }, {
+                value: 1,
+                color: upColor
+            }]
+        },
+        grid: [
+            {
+                left: '4%',
+                right: '0%',
+                height: '15%'
+            },
+            {
+                top: '28%',
+                left: '4%',
+                right: '0%',
+                height: '20%'
+            },
+            {
+                top: '55%',
+                left: '4%',
+                right: '0%',
+                height: '20%'
+            },
+            {
+                left: '4%',
+                right: '0%',
+                top: '89%',
+                height: '10%'
+            }
+        ],
+        xAxis: [
+            {
+                type: 'category',
+                data: kdata.dates,
+                splitLine: { show: false },
+                gridIndex: 0,
+            },
+            {
+                type: 'category',
+                data: kdata.dates,
+                splitLine: { show: false },
+                gridIndex: 1,
+            },
+            {
+                type: 'category',
+                data: kdata.dates,
+                scale: true,
+                boundaryGap: false,
+                axisLine: { onZero: false },
+                splitLine: { show: false },
+                splitNumber: 20,
+                min: 'dataMin',
+                max: 'dataMax',
+                gridIndex: 2,
+                axisPointer: {
+                    z: 100
+                }
+            },
+            {
+                type: 'category',
+                gridIndex: 3,
+                data: kdata.dates,
+                scale: true,
+                boundaryGap: false,
+                axisLine: { onZero: false },
+                axisTick: { show: false },
+                splitLine: { show: false },
+                axisLabel: { show: false },
+                splitNumber: 20,
+                min: 'dataMin',
+                max: 'dataMax',
+            }
+        ],
+        yAxis: [
+            {
+                scale: true,
+                type: 'category',
+                data: yDict.map(function (d) { return d.name }),
+                gridIndex: 0,
+                axisLabel: {
+                    fontSize: 9
+                }
+            },
+            {
+                scale: true,
+                type: 'value',
+                gridIndex: 1,
+            },
+            {
+                scale: true,
+                gridIndex: 2,
+                splitArea: {
+                    show: true
+                }
+            },
+            {
+                scale: true,
+                gridIndex: 3,
+                splitNumber: 2,
+                axisLabel: { show: false },
+                axisLine: { show: false },
+                axisTick: { show: false },
+                splitLine: { show: false }
+            }
+        ],
+        dataZoom: [
+            {
+                type: 'inside',
+                xAxisIndex: [0, 1, 2, 3],
+                start: 95,
+                end: 100
+            },
+            {
+                show: true,
+                xAxisIndex: [0, 1, 2, 3],
+                type: 'slider',
+                top: '85%',
+                start: 95,
+                end: 100
+            }
+        ],
+        series: [
+            {
+                name: 'Price',
+                type: 'candlestick',
+                data: kdata.values,
+                xAxisIndex: 2,
+                yAxisIndex: 2,
+                barMaxWidth: 20,
+                itemStyle: {
+                    normal: {
+                        color: upColor,
+                        color0: downColor,
+                        borderColor: upBorderColor,
+                        borderColor0: downBorderColor
+                    }
+                },
+                markPoint: {
+                    label: {
+                        normal: {
+                            formatter: function (param) {
+                                return param != null ? param.value : '';
+                            }
+                        }
+                    },
+                    data: [
+                        {
+                            name: 'highest value',
+                            type: 'max',
+                            valueDim: 'highest'
+                        },
+                        {
+                            name: 'lowest value',
+                            type: 'min',
+                            valueDim: 'lowest'
+                        }
+                    ]
+                }
+            },
+            {
+                name: 'Volume',
+                type: 'bar',
+                xAxisIndex: 3,
+                yAxisIndex: 3,
+                data: kdata.volumes
+            },
+            {
+                name: 'y_assist',
+                type: 'k',
+                xAxisIndex: 1,
+                yAxisIndex: 1,
+                data: yAssist,
+                itemStyle: {
+                    normal: {
+                        color: upColor,
+                        color0: downColor,
+                        borderColor: upBorderColor,
+                        borderColor0: downBorderColor
+                    }
+                },
+            },
+            {
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                name: 'range',
+                type: 'scatter',
+                data: kdata.ranges,
+                color: '#d03'
+            },
+            {
+                xAxisIndex: 0,
+                yAxisIndex: 0,
+                name: 'prediction',
+                type: 'line',
+                smooth: true,
+                color: '#05a',
+                data: kdata.predictions
+            }
+        ]
+    };
+
+    myChart.setOption(option);
+</script>
+{% endif %}
+{% endblock content %}
