@@ -37,7 +37,7 @@
             {% endfor %}
         </p>
         <h5>
-            样本数量（验证集/全集）：<em>{{ infos.results.sample_num }}/{{ (infos.results.sample_num*infos.test_size)|int }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            样本数量（验证集/全集）：<em>{{ infos.results.sample_num }}/{{ infos.results.test_size }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             验证准确率：<em>{{ '%.2f%%' | format(infos.results.score*100) }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             实际超出预测比率（验证集/全集）：<em>{{ '%.2f%%' | format(infos.results.smaller_rate*100) }}/{{ '%.2f%%' | format(infos.results.smaller_rate_all*100) }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </h5>

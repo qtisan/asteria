@@ -4,7 +4,7 @@ from sklearn.svm import SVC
 from sklearn.neural_network import MLPClassifier
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF, RationalQuadratic
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 
 from sklearn.model_selection import train_test_split, GridSearchCV
@@ -41,10 +41,11 @@ def no_norm(clf, x, y, x_latest, y_latest):
 def tt_split(x, y, test_size=0.2, *args, **kwargs):
     length = len(y)
     train_length = length - int(test_size * length)
-    x_train = x[:train_length]
-    y_train = y[:train_length]
-    x_test = x[train_length:]
-    y_test = y[train_length:]
+    start = length - train_length
+    x_train = x[start:]
+    y_train = y[start:]
+    x_test = x[:start]
+    y_test = y[:start]
     return x_train, x_test, y_train, y_test
 
 
@@ -97,13 +98,24 @@ clfs = {
     },
     'RandomForestClassifier': {
         'clf':
-            RandomForestClassifier(max_depth=100,
-                                   n_estimators=2000,
-                                   min_samples_split=5),
+            RandomForestClassifier(max_depth=200,
+                                   n_estimators=3000,
+                                   min_samples_split=15),
         'args': [{
             'n_estimators': [10, 100, 250],
             'max_depth': [5, 12],
             'max_features': [2, 15, 50]
+        }],
+        'norm':
+            no_norm
+    },
+    'AdaBoostClassifier': {
+        'clf':
+            AdaBoostClassifier(n_estimators=2000, learning_rate=1e-1,
+                               random_state=29),
+        'args': [{
+            'n_estimators': [100, 1000, 2000],
+            'learning_rate': [1, 1e-1, 1e-2, 1e-3]
         }],
         'norm':
             no_norm

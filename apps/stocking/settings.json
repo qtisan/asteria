@@ -64,9 +64,9 @@
         "low__3"
     ],
     "features_all": false,
-    "past_days": 5,
+    "past_days": 10,
     "future_days": 5,
-    "test_size": 0.08,
+    "test_size": 0.05,
     "random_state": 29,
     "feature_pows": [
         2,
@@ -80,27 +80,27 @@
         10
     ],
     "zeros_copy_days": 10,
-    "classifier": "RandomForestClassifier",
+    "classifier": "AdaBoostClassifier",
     "y_dict": [
         {
-            "name": "下跌",
+            "name": "-",
             "threshold": -99999
         },
         {
-            "name": "涨0-3%",
+            "name": "+",
             "threshold": 0
         },
         {
-            "name": "涨3-6%",
+            "name": "+3%",
             "threshold": 0.03
         },
         {
-            "name": "涨6-10%",
-            "threshold": 0.06
+            "name": "+5%",
+            "threshold": 0.05
         },
         {
-            "name": "涨超10%",
-            "threshold": 0.1
+            "name": "+10%",
+            "threshold": 0.10
         }
     ],
     "x_dict": {

@@ -65,7 +65,7 @@ def predict(infos,
     if use_default:
         param_grid = None
 
-    clf, score, smaller_rate, smaller_rate_all, y_all, y_pred = \
+    clf, score, smaller_rate, smaller_rate_all, equal_rate_all, y_all, y_pred = \
         train.train(x, y, classifier, param_grid=param_grid, t_t_split=tt_split,
                      x_latest=x_latest, y_latest=y_latest, pre_process=norm, **infos)
 
@@ -79,7 +79,9 @@ def predict(infos,
         'score': score,
         'smaller_rate': smaller_rate,
         'smaller_rate_all': smaller_rate_all,
-        'sample_num': len(xy)
+        'equal_rate_all': equal_rate_all,
+        'sample_num': len(xy),
+        'test_size': int(len(y) * infos['test_size'])
     }
     feature_names = []
     fs_reg = '|'.join(x_dict.keys())

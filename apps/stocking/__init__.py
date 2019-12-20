@@ -59,10 +59,10 @@ def predict_batch(settings):
         raise 'Settings not found!'
 
 
-def run_one(code, classifier='RandomForestClassifier'):
+def run_one(code, classifier=None):
     settings = get_settings()
     settings['stocks'] = [code]
-    if classifier in clfs:
+    if (classifier is not None) and (classifier in clfs):
         settings['classifier'] = classifier
     predict_batch(settings)
 

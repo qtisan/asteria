@@ -9,4 +9,4 @@ setup(name='asteria',
       author_email='qtisan@hotmail.com',
       url='https://github.com/qtisan/asteria.git',
       packages=find_packages(),
-      scripts=['scripts/run', 'scripts/test'])
+      scripts=['scripts/stocking', 'scripts/test'])

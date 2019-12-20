@@ -1,4 +1,5 @@
 import numpy as np
+import moment
 from sklearn.model_selection import train_test_split, GridSearchCV
 
 from apps.stocking.metainfo import logger
@@ -30,7 +31,10 @@ def train(x,
     logger.debug('Train with \n {0} \n'.format(str(clf)))
     logger.debug('Fitting...')
 
+    timestart = moment.now().epoch()
     clf.fit(x_train, y_train)
+    logger.debug('-- Fit time cost: {0} sec.'.format(moment.now().epoch() -
+                                                     timestart))
     logger.debug('Computing score...')
     score = clf.score(x_test, y_test)
     best_score = score
@@ -51,11 +55,16 @@ def train(x,
         smaller_rate * 100, np.count_nonzero(yvy), len(yvy)))
 
     y_all = best_estimator.predict(x)
+    yey = y_all == y
     yay = y_all <= y
+    equal_rate_all = np.mean(yey)
     smaller_rate_all = np.mean(yay)
-    logger.debug('All smaller rate: {0:.2f}%({1}/{2})'.format(
-        smaller_rate_all * 100, np.count_nonzero(yay), len(yay)))
+    logger.debug(
+        'All equal rate: {3:.2f}%({4}/{5}), smaller rate: {0:.2f}%({1}/{2})'.format(
+            smaller_rate_all * 100, np.count_nonzero(yay), len(yay),
+            equal_rate_all * 100, np.count_nonzero(yey), len(yey)))
 
-    y_pred = best_estimator.predict(x_latest)
+    y_pred_all = best_estimator.predict(np.concatenate((x_latest, x)))
+    y_pred = y_pred_all[len(y):]
 
-    return best_estimator, best_score, smaller_rate, smaller_rate_all, y_all, y_pred
+    return best_estimator, best_score, smaller_rate, smaller_rate_all, equal_rate_all, y_all, y_pred
