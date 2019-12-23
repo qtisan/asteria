@@ -42,7 +42,7 @@
         "r0_net_chg_1",
         "r0_ratio_chg_1",
         "r0x_ratio",
-        "r0x_ratio__3",
+        "r0x_ratio_chg_3",
         "close_chg_1",
         "high_chg_1",
         "high_chg_3",
@@ -52,22 +52,23 @@
         "low_chg_5",
         "open_chg_3",
         "yest_chg_3",
-        "turnover__3",
         "turnover_chg_1",
         "turnover_chg_2",
         "turnover_chg_3",
         "turnover_chg_5",
         "turnover_chg_10",
         "circul_chg_10",
-        "volume__3",
+        "volume_chg_1",
+        "volume_chg_2",
+        "volume_chg_3",
         "low_chg_1",
-        "low__3"
+        "low_chg_3"
     ],
     "features_all": false,
-    "past_days": 10,
+    "past_days": 5,
     "future_days": 5,
-    "test_size": 0.05,
-    "random_state": 29,
+    "test_size": 0.08,
+    "random_state": 0,
     "feature_pows": [
         2,
         3
@@ -80,7 +81,8 @@
         10
     ],
     "zeros_copy_days": 10,
-    "classifier": "AdaBoostClassifier",
+    "estimator": "RandomForestRegressor",
+    "estimator_default": true,
     "y_dict": [
         {
             "name": "-",
@@ -91,16 +93,16 @@
             "threshold": 0
         },
         {
-            "name": "+3%",
-            "threshold": 0.03
+            "name": "+2%",
+            "threshold": 0.02
         },
         {
             "name": "+5%",
             "threshold": 0.05
         },
         {
-            "name": "+10%",
-            "threshold": 0.10
+            "name": "+8%",
+            "threshold": 0.08
         }
     ],
     "x_dict": {

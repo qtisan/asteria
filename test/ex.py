@@ -2,9 +2,9 @@ import sys
 from pathlib import Path
 sys.path.append(str(Path(__file__, '../../').resolve()))
 
-# import os
-# import numpy as np
-# import pandas as pd
+import os
+import numpy as np
+import pandas as pd
 # import requests
 # import pickle
 # import moment
@@ -18,14 +18,16 @@ sys.path.append(str(Path(__file__, '../../').resolve()))
 # from sklearn.pipeline import Pipeline
 # from sklearn.datasets import fetch_openml
 from sklearn.gaussian_process import GaussianProcessRegressor, GaussianProcessClassifier
-from sklearn.gaussian_process.kernels \
-    import RBF, WhiteKernel, RationalQuadratic, ExpSineSquared, DotProduct, ConstantKernel as C
+# from sklearn.gaussian_process.kernels \
+#     import RBF, WhiteKernel, RationalQuadratic, ExpSineSquared, DotProduct, ConstantKernel as C
+from sklearn.base import is_classifier, is_regressor
+clf = GaussianProcessClassifier()
+rgs = GaussianProcessRegressor()
+print(is_classifier(clf), is_regressor(clf))
+print(is_classifier(rgs), is_regressor(rgs))
 
 # from matplotlib import pyplot as plt, cm
 # from matplotlib.collections import LineCollection
-
-clf = GaussianProcessClassifier(1.0 * RBF(1.0))
-print(str(clf))
 
 # 数据降维
 # rng = np.random.RandomState(0)
@@ -137,3 +139,8 @@ print(str(clf))
 # ptn = re.compile(reg)
 # ob = ptn.search(sx)
 # print(ptn.pattern)
+
+x = (1, 2)
+y = (*x, 4)
+
+print(y)

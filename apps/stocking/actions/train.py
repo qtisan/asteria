@@ -1,61 +1,80 @@
 import numpy as np
 import moment
 from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.base import is_classifier, is_regressor
 
 from apps.stocking.metainfo import logger
 
 
-def train(x,
-          y,
-          clf,
-          x_latest=None,
-          y_latest=None,
-          param_grid=None,
-          pre_process=lambda *p: p,
-          test_size=0.1,
-          random_state=29,
-          t_t_split=train_test_split,
-          *args,
-          **kwargs):
+def fit(x,
+        ys,
+        estimator,
+        param_grid=None,
+        x_latest=None,
+        ys_latest=None,
+        pre_process=lambda *p: p,
+        pre_process_args={},
+        test_size=0.1,
+        random_state=29,
+        t_t_split=train_test_split,
+        *args,
+        **kwargs):
 
-    logger.debug('Preprocessing data with {0}...'.format(pre_process.__name__))
-    clf, x, y, x_latest, y_latest = pre_process(clf, x, y, x_latest, y_latest)
+    col_index = 0 if is_classifier(estimator) else 1
+    col_index = 1 if is_regressor(estimator) else None
+    if col_index is None:
+        raise 'Estimator <{0}> error, not Classifier or Regressor!'.format(
+            str(estimator))
+    y, y_latest = ys[:, col_index], ys_latest[:, col_index]
+
+    if callable(pre_process):
+        logger.debug('Preprocessing data with {0}...'.format(str(pre_process)))
+        estimator, x, y, x_latest, y_latest = pre_process(estimator, x, y, x_latest,
+                                                          y_latest,
+                                                          **pre_process_args)
 
     if param_grid is not None:
-        clf = GridSearchCV(clf, param_grid)
+        estimator = GridSearchCV(estimator, param_grid)
     x_train, x_test, y_train, y_test = \
         t_t_split(x, y, test_size=test_size, random_state=random_state)
     logger.debug(
         'Train and Test split, train size: x{0} y{1}, test size: x{2} y{3}.'.format(
             np.shape(x_train), np.shape(y_train), np.shape(x_test), np.shape(y_test)))
-    logger.debug('Train with \n {0} \n'.format(str(clf)))
+    logger.debug('Train with \n {0} \n'.format(str(estimator)))
     logger.debug('Fitting...')
 
     timestart = moment.now().epoch()
-    clf.fit(x_train, y_train)
+    estimator.fit(x_train, y_train)
     logger.debug('-- Fit time cost: {0} sec.'.format(moment.now().epoch() -
                                                      timestart))
     logger.debug('Computing score...')
-    score = clf.score(x_test, y_test)
+    score = estimator.score(x_test, y_test)
     best_score = score
-    best_estimator = clf
+    best_estimator = estimator
     if param_grid is not None:
-        best_score = clf.best_score_
-        best_estimator = clf.best_estimator_
-    logger.debug('Test score: {0:.2f}%'.format(score * 100))
+        best_score = estimator.best_score_
+        best_estimator = estimator.best_estimator_
+
+    score_form = 'Best score: {0:.2f}%'.format(
+        best_score *
+        100) if col_index == 0 else 'Best score: {0:.2f}'.format(best_score)
     if param_grid is not None:
-        logger.debug('Best score: {0:.2f}%'.format(best_score * 100))
-        logger.debug('Best params: {0}'.format(str(clf.best_params_)))
+        logger.debug(score_form)
+        logger.debug('Best params: {0}'.format(str(estimator.best_params_)))
+    else:
+        logger.debug(score_form)
 
     # Validation
-    y_valid = best_estimator.predict(x_test)
-    yvy = y_valid <= y_test
+    y_test_valid = best_estimator.predict(x_test)
+    yvy = y_test_valid <= y_test
     smaller_rate = np.mean(yvy)
-    logger.debug('Valid smaller rate: {0:.2f}%({1}/{2})'.format(
+    logger.debug('Test smaller rate: {0:.2f}%({1}/{2})'.format(
         smaller_rate * 100, np.count_nonzero(yvy), len(yvy)))
 
-    y_all = best_estimator.predict(x)
-    yey = y_all == y
+    y_pred_all = best_estimator.predict(np.concatenate((x_latest, x)))
+    y_pred = y_pred_all[len(y):]
+    y_all = y_pred_all[:len(y)]
+    yey = y_all == y if col_index == 0 else np.abs((y_all - y) / y) <= 0.05
     yay = y_all <= y
     equal_rate_all = np.mean(yey)
     smaller_rate_all = np.mean(yay)
@@ -64,7 +83,4 @@ def train(x,
             smaller_rate_all * 100, np.count_nonzero(yay), len(yay),
             equal_rate_all * 100, np.count_nonzero(yey), len(yey)))
 
-    y_pred_all = best_estimator.predict(np.concatenate((x_latest, x)))
-    y_pred = y_pred_all[len(y):]
-
-    return best_estimator, best_score, smaller_rate, smaller_rate_all, equal_rate_all, y_all, y_pred
+    return best_estimator, best_score, smaller_rate, smaller_rate_all, equal_rate_all, y_all, y_pred, y_latest

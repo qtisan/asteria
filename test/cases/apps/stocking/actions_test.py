@@ -6,7 +6,7 @@ from apps.stocking.actions.fetch import fetch_data
 from apps.stocking import logger
 
 from apps.stocking.actions.make import make_x, make_y, make_xy
-from apps.stocking.classifiers import y_categorifier
+from apps.stocking.estimators import y_categorifier
 
 import pandas as pd
 

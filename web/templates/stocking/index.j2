@@ -13,12 +13,12 @@
             {% if stock == 'all' %}
 
             <li class="item">
-                <a href="{{ '#' if code is not defined else '/stocking' }}"
+                <a href="{{ '#' if code is not defined else '/stocking/p' }}"
                     class="{{ 'active' if code is not defined else '' }}">{{ stock }}</a>
             </li>
             {% else %}
             <li class="item">
-                <a href="{{ '#' if code == stock else '/stocking/{0}'.format(stock) }}"
+                <a href="{{ '#' if code == stock else '/stocking/p/{0}'.format(stock) }}"
                     class="{{ 'active' if code == stock else '' }}">{{ stock }}</a>
             </li>
             {% endif %}
@@ -28,7 +28,7 @@
     <div class="main-content">
         {% if infos is defined %}
         <h1>{{ infos.code }}&nbsp;({{ infos.time }})</h1>
-        <p><code>{{ infos.classifier }}</code>算法，计算过去<em>{{ infos.past_days }}</em>交易日数据，预测未来<em>{{ infos.future_days }}</em>交易日最高价较当天收盘价变化幅度。
+        <p>计算过去<em>{{ infos.past_days }}</em>交易日数据，预测未来<em>{{ infos.future_days }}</em>交易日最高价较当天收盘价变化幅度。
         </p>
         <h5>预测因子：</h5>
         <p>
@@ -37,8 +37,8 @@
             {% endfor %}
         </p>
         <h5>
-            样本数量（验证集/全集）：<em>{{ infos.results.sample_num }}/{{ infos.results.test_size }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            验证准确率：<em>{{ '%.2f%%' | format(infos.results.score*100) }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            样本数量（验证集/全集）：<em>{{ infos.results.test_size }}/{{ infos.results.sample_num }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            准确率（验证集/全集）：<em>{{ '%.2f%%' | format(infos.results.score*100) }}/{{ '%.2f%%' | format(infos.results.equal_rate_all*100) }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             实际超出预测比率（验证集/全集）：<em>{{ '%.2f%%' | format(infos.results.smaller_rate*100) }}/{{ '%.2f%%' | format(infos.results.smaller_rate_all*100) }}</em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
         </h5>
         <div class="details">
@@ -53,6 +53,10 @@
     var kdata = JSON.parse('{{ kdata | tojson }}'.replace(/NaN/gi, '0'));
     var infos = JSON.parse('{{ infos | tojson }}'.replace(/\\n/gi, ''));
     var yDict = JSON.parse('{{ y_dict | tojson }}');
+
+    var typed = function (as_clf, as_regr) {
+        return infos.type === 'classify' ? as_clf : as_regr;
+    }
 
     var yCloses = kdata.values.map(function (y) { return y[1] });
     var yAssist = [];
@@ -113,10 +117,12 @@
                     '成交量: ' + vol.data[1] + '<hr size=1 style="margin: 8px 0">',
                     '收盘/' + infos.future_days + '天最高: <span style="color:' + clrs[2] + '">' + yas.data[1] + '</span>/',
                     '<span style="color:' + clry + '">' + yas.data[2] + '</span><br/>',
-                    '涨跌: <span style="color:' + clry + '">' + yas.data[5] + '</span><br/>',
+                    '涨跌: <span style="color:' + clry + '">' + (yas.data[5] * 100).toFixed(2) + '%</span><br/>',
                     '<hr size=1 style="margin: 5px 0">',
-                    '预测: <span style="color:' + clry + '">' + yDict[preds.data].name + '</span><br/>',
-                    '实际: <span style="color:' + clry + '">' + yDict[rans.data].name + '</span><br/>'
+                    '预测: <span style="color:' + clry + '">' +
+                    typed(yDict[preds.data] && yDict[preds.data].name, preds.data.toFixed(2)) + '</span><br/>',
+                    '实际: <span style="color:' + clry + '">' +
+                    typed(yDict[rans.data] && yDict[rans.data].name, rans.data) + '</span><br/>'
                 ].join('');
             }
         },
@@ -207,7 +213,7 @@
             }
         ],
         yAxis: [
-            {
+            typed({
                 scale: true,
                 type: 'category',
                 data: yDict.map(function (d) { return d.name }),
@@ -215,7 +221,11 @@
                 axisLabel: {
                     fontSize: 9
                 }
-            },
+            }, {
+                scale: true,
+                type: 'value',
+                gridIndex: 0,
+            }),
             {
                 scale: true,
                 type: 'value',
@@ -242,7 +252,7 @@
             {
                 type: 'inside',
                 xAxisIndex: [0, 1, 2, 3],
-                start: 95,
+                start: 90,
                 end: 100
             },
             {
@@ -250,7 +260,7 @@
                 xAxisIndex: [0, 1, 2, 3],
                 type: 'slider',
                 top: '85%',
-                start: 95,
+                start: 90,
                 end: 100
             }
         ],

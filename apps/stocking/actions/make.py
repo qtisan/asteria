@@ -53,14 +53,17 @@ def cate_y(y_value):
 
 def make_y(index,
            ds: pd.DataFrame,
-           cols,
+           cols=['close', 'high'],
            future_days=10,
            categorify=cate_y,
-           colname='range',
+           y_cate_name='y_cate',
+           y_value_name='y_value',
+           y_change_name='y_change',
            return_value_change=True,
            *args,
            **kwargs):
     high_ds = ds.loc[:, cols]
+    y_colnames = [y_cate_name, y_value_name, y_change_name]
 
     def ran(row):
         curr_i = row.name
@@ -68,23 +71,19 @@ def make_y(index,
         h_max = high_ds.iloc[curr_b:curr_i].max().max()
         curr_close = row['close']
         yc = (h_max - curr_close) / curr_close if curr_close != 0 else -0.01
-        return pd.Series([categorify(yc), h_max, '{0:.2f}%'.format(yc * 100)],
-                         index=[colname, 'y_v', 'y_c'])
+        return pd.Series([categorify(yc), h_max, yc], index=y_colnames)
 
     ys = high_ds.iloc[index].apply(ran, axis=1)
-    val = ys.iloc[:][colname]
-    if return_value_change:
-        val = (val, ys.iloc[:][['y_v', 'y_c']])
-    return val
+
+    return ys.iloc[:][y_colnames] if return_value_change else ys.iloc[:][y_cate_name]
 
 
 def make_xy(ds: pd.DataFrame,
             features,
             past_days=20,
             future_days=10,
-            y_col_names=['high', 'close'],
             categorify=cate_y,
-            y_cate_name='range',
+            y_names=['y_cate', 'y_value', 'y_change'],
             return_Xy=False,
             to_numpy=True,
             *args,
@@ -102,31 +101,33 @@ def make_xy(ds: pd.DataFrame,
     logger.debug('Indexing from {0} to {1} in featured_ds...'.format(begin, end))
 
     x = make_x(range(begin, end), ds, features=features, past_days=past_days)
-    y, y_vc = make_y(range(begin, end),
-                     ds,
-                     cols=y_col_names,
-                     future_days=future_days,
-                     colname=y_cate_name,
-                     categorify=categorify)
+    ys = make_y(range(begin, end),
+                ds,
+                future_days=future_days,
+                y_cate_name=y_names[0],
+                y_value_name=y_names[1],
+                y_change_name=y_names[2],
+                categorify=categorify)
     x_latest = make_x(range(begin), ds, features=features, past_days=past_days)
-    y_latest, y_vc_latest = make_y(range(begin),
-                                   ds,
-                                   cols=y_col_names,
-                                   future_days=future_days,
-                                   colname=y_cate_name,
-                                   categorify=categorify)
+    ys_latest = make_y(range(begin),
+                       ds,
+                       future_days=future_days,
+                       y_cate_name=y_names[0],
+                       y_value_name=y_names[1],
+                       y_change_name=y_names[2],
+                       categorify=categorify)
 
     logger.debug('x size: {0}'.format(x.shape))
-    logger.debug('y size: {0}'.format(y.shape))
+    logger.debug('y size: {0} (cate, value, change)'.format(ys.shape))
     logger.debug('x_latest size: {0}'.format(x_latest.shape))
-    logger.debug('y_latest size: {0}'.format(y_latest.shape))
-    logger.debug('composing...')
+    logger.debug('y_latest size: {0} (cate, value, change)'.format(ys_latest.shape))
+    logger.debug('------------------------------------')
     if return_Xy:
         if to_numpy:
-            return x.to_numpy(), y.to_numpy(), x_latest.to_numpy(), y_latest.to_numpy(
-            ), y_vc.to_numpy(), y_vc_latest.to_numpy()
-        return x, y, x_latest, y_latest, y_vc, y_vc_latest
+            return x.to_numpy(), ys.to_numpy(), x_latest.to_numpy(
+            ), ys_latest.to_numpy()
+        return x, ys, x_latest, ys_latest
     if to_numpy:
-        return pd.concat([x, y], axis=1).to_numpy(), x_latest.to_numpy(
-        ), y_latest.to_numpy(), y_vc.to_numpy(), y_vc_latest.to_numpy()
-    return pd.concat([x, y], axis=1), x_latest, y_latest, y_vc, y_vc_latest
+        return pd.concat(
+            [x, ys], axis=1).to_numpy(), x_latest.to_numpy(), ys_latest.to_numpy()
+    return pd.concat([x, ys], axis=1), x_latest, ys_latest

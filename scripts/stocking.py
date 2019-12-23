@@ -16,19 +16,19 @@ if __name__ == "__main__":
 
     if arglen == 2:
         if args[1] == 'all':
-            logger.info('- Stock Predicting ALL CODES with default classifier.')
+            logger.info('- Stock Predicting ALL CODES with default Estimator.')
             run_batch()
         else:
-            logger.info('- Stock Predicting ({0}) with default classifier.'.format(
+            logger.info('- Stock Predicting ({0}) with default Estimator.'.format(
                 args[1]))
             run_one(args[1])
     elif arglen == 3:
         if isinstance(args[2], str):
             logger.info('- Stock Predicting ({0}) with [{1}].'.format(
                 args[1], args[2]))
-            run_one(args[1], classifier=args[2])
+            run_one(args[1], estimator=args[2])
         else:
-            raise 'Error argument [classifier]!'
+            raise 'Error argument [estimator]!'
 
     else:
         logger.error('Arguments num not correct.')

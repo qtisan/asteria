@@ -6,7 +6,7 @@ from apps.stocking import get_settings, read_infos, read_original_data, read_xyy
 bp = Blueprint('stocking', __name__, url_prefix='/stocking')
 
 
-@bp.route('/')
+@bp.route('/p')
 @login_required
 def index():
     settings = get_settings()
@@ -15,13 +15,16 @@ def index():
     return render_template('stocking/index.j2', title='Stocking', stocks=stocks)
 
 
-@bp.route('/<string:code>')
+@bp.route('/p/<string:code>')
 @login_required
 def infos(code: str):
     settings = get_settings()
     stocks = list(settings['stocks'])
     stocks.insert(0, 'all')
     infos = read_infos(code)
+
+    def typed(as_clf, as_regr):
+        return as_clf if infos['type'] == 'classify' else as_regr
 
     od = read_original_data(code)
     xy = read_xyy(code)
@@ -40,10 +43,10 @@ def infos(code: str):
         volumes.append(
             [len_dss - k, v['volume'], 1 if v['open'] < v['close'] else -1])
         dates.append(v['opendate'])
-        ranges.append(xy[k]['range'])
+        ranges.append(typed(xy[k]['y_cate'], xy[k]['y_value']))
         predictions.append(xy[k]['prediction'])
-        y_cs.append(xy[k]['y_c'])
-        y_vs.append(xy[k]['y_v'])
+        y_cs.append(xy[k]['y_change'])
+        y_vs.append(xy[k]['y_value'])
     last_index = len(y_vs) - 1
     y_vs[last_index] = values[last_index][1]
     y_cs[last_index] = '0%'
