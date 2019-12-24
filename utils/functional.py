@@ -46,10 +46,10 @@ def is_yesterday(today: moment.Moment, target_day: moment.Moment):
     return time_span(today, target_day) == -1
 
 
-def move_up(arr, n):
+def move_up(arr: np.ndarray, n: int):
     return np.concatenate((arr[n:len(arr)], np.repeat([arr[len(arr) - 1]], n,
                                                       axis=0)))
 
 
-def move_down(arr, n):
+def move_down(arr: np.ndarray, n: int):
     return np.concatenate((np.repeat([arr[0]], n, axis=0), arr[0:len(arr) - n]))

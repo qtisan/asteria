@@ -16,12 +16,14 @@ def fit(x,
         pre_process_args={},
         test_size=0.1,
         random_state=29,
+        regress_col_index=2,
+        classify_col_index=0,
         t_t_split=train_test_split,
         *args,
         **kwargs):
 
-    col_index = 0 if is_classifier(estimator) else 1
-    col_index = 1 if is_regressor(estimator) else None
+    col_index = classify_col_index if is_classifier(estimator) else (
+        regress_col_index if is_regressor(estimator) else None)
     if col_index is None:
         raise 'Estimator <{0}> error, not Classifier or Regressor!'.format(
             str(estimator))
@@ -57,7 +59,8 @@ def fit(x,
 
     score_form = 'Best score: {0:.2f}%'.format(
         best_score *
-        100) if col_index == 0 else 'Best score: {0:.2f}'.format(best_score)
+        100) if col_index == classify_col_index else 'Best score: {0:.2f}'.format(
+            best_score)
     if param_grid is not None:
         logger.debug(score_form)
         logger.debug('Best params: {0}'.format(str(estimator.best_params_)))
@@ -74,7 +77,8 @@ def fit(x,
     y_pred_all = best_estimator.predict(np.concatenate((x_latest, x)))
     y_pred = y_pred_all[len(y):]
     y_all = y_pred_all[:len(y)]
-    yey = y_all == y if col_index == 0 else np.abs((y_all - y) / y) <= 0.05
+    yey = y_all == y if col_index == classify_col_index else np.abs(
+        (y_all - y) / y) <= 0.05
     yay = y_all <= y
     equal_rate_all = np.mean(yey)
     smaller_rate_all = np.mean(yay)

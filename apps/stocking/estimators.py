@@ -41,18 +41,15 @@ estimators = {
         }
     },
     'RandomForestClassifier': {
-        'estimator':
-            RandomForestClassifier(max_depth=500, n_estimators=1000,
-                                   max_features=150),
+        'estimator': RandomForestClassifier(max_depth=500, n_estimators=1000),
         'args': {
             'n_estimators': [100, 1000, 5000],
-            'max_depth': [500, 1200],
-            'max_features': [10, 50, 150, 280]
+            'max_depth': [500, 1200]
         },
         'preproc': {
             'method': pure_features,
             'args': {
-                'k': 270
+                'k': 20
             }
         }
     },

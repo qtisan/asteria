@@ -19,7 +19,7 @@ def get_settings():
     return settings
 
 
-def save_infos(infos, estimator, xy_original, xy, dirname='latest'):
+def save_infos(infos, estimator, ds, xy, dirname='latest'):
     info_dir = TRAINED_ROOT / infos['name'] / dirname
     if not info_dir.exists():
         os.makedirs(info_dir)
@@ -30,7 +30,7 @@ def save_infos(infos, estimator, xy_original, xy, dirname='latest'):
         pickle.dump(estimator, f)
     with open(info_dir / 'infos.json', 'w') as f:
         json.dump(infos, f, ensure_ascii=False, sort_keys=True, indent=2)
-    xy_original.to_csv(info_dir / 'xy_original.csv')
+    ds.to_csv(info_dir / 'ds.csv')
     xy.to_csv(info_dir / 'xy.csv')
 
 
@@ -59,20 +59,20 @@ def predict_batch(settings):
             infos['code'] = code
             infos['time'] = moment.now().format('YYYY-MM-DD HH:mm:ss')
 
-            inf, est, oxy, xy, lp = predict(infos,
-                                            categorify_y=classify_y,
-                                            use_default=use_default,
-                                            y_dict=y_dict,
-                                            x_dict=x_dict,
-                                            x_dict_extra=x_dict_extra,
-                                            return_latest_prediction=True,
-                                            save_files=True,
-                                            features_all=features_all)
+            inf, est, ds, xy, lp = predict(infos,
+                                           categorify_y=classify_y,
+                                           use_default=use_default,
+                                           y_dict=y_dict,
+                                           x_dict=x_dict,
+                                           x_dict_extra=x_dict_extra,
+                                           return_latest_prediction=True,
+                                           save_files=True,
+                                           features_all=features_all)
 
             print('Predict last {0} days:'.format(inf['future_days']))
             print(lp)
 
-            save_infos(infos, est, oxy, xy)
+            save_infos(infos, est, ds, xy)
             time.sleep(1.0)
     else:
         raise 'Settings not found!'

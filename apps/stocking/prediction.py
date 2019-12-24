@@ -62,7 +62,7 @@ def prepare_data(infos,
 
 def make_latest(future_days, index, y_latest, y_pred, y_dict, is_clf):
     fds = '未来{0}天'.format(future_days)
-    vls = lambda y: [(y_dict[v]['name'] if is_clf else '{0:.2f}'.format(v))
+    vls = lambda y: [(y_dict[int(v)]['name'] if is_clf else '{0:.2f}'.format(v))
                      for v in y]
     y_pred_names = np.char.add(fds, vls(preprocess.rav(y_pred)))
     y_latest_names = np.char.add(fds, vls(preprocess.rav(y_latest)))
@@ -113,7 +113,17 @@ def predict(infos,
 
     # fetch and extends data
     original_ds = fetch.fetch(**infos)
+    logger.debug('------------------------------')
+    logger.debug('Data Fetched:')
+    logger.debug(original_ds)
+    logger.debug('------------------------------')
     ds = extends.extends_ds(original_ds, x_dict=x_dict, **infos)
+    logger.debug('------------------------------')
+    logger.debug('Data Extended:')
+    logger.debug(ds)
+    logger.debug('Columns: {0}'.format(ds.shape))
+    logger.debug(ds.keys().values)
+    logger.debug('------------------------------')
 
     x, ys, x_latest, ys_latest, xy_original = \
         prepare_data(infos,
@@ -177,7 +187,8 @@ def predict(infos,
                               x_dict_extra=x_dict_extra)
     }
 
-    val = (infos, best_estimator, xy_original, xy)
+    ds = pd.concat([original_ds.iloc[:]['opendate'], ds], axis=1)
+    val = (infos, best_estimator, ds, xy)
 
     # latest predictions
     if return_latest_prediction:

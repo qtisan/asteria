@@ -43,7 +43,7 @@ def infos(code: str):
         volumes.append(
             [len_dss - k, v['volume'], 1 if v['open'] < v['close'] else -1])
         dates.append(v['opendate'])
-        ranges.append(typed(xy[k]['y_cate'], xy[k]['y_value']))
+        ranges.append(typed(xy[k]['y_cate'], xy[k]['y_change']))
         predictions.append(xy[k]['prediction'])
         y_cs.append(xy[k]['y_change'])
         y_vs.append(xy[k]['y_value'])
