@@ -6,6 +6,7 @@ from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF, RationalQuadratic
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier, RandomForestRegressor
 from sklearn.naive_bayes import GaussianNB
+from sklearn.base import is_classifier, is_regressor
 
 from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.pipeline import Pipeline
@@ -15,7 +16,37 @@ from apps.stocking.actions.preprocess import no_norm, normalization, pure_featur
 from apps.stocking.actions.split import tt_split
 from apps.stocking.actions.categorify import y_categorifier
 
+# TODO: Ignore future warning, as https://github.com/EpistasisLab/tpot/issues/981
+import warnings
+warnings.filterwarnings("ignore")
+from tpot import TPOTClassifier, TPOTRegressor
+from tpot.base import TPOTBase
+
+
+def is_clfr(estimator):
+    if isinstance(estimator, TPOTBase):
+        return estimator.classification
+    else:
+        return is_classifier(estimator)
+
+
 estimators = {
+    'TPOTClassifier': {
+        'estimator':
+            TPOTClassifier(generations=2,
+                           offspring_size=5,
+                           population_size=10,
+                           verbosity=2,
+                           random_state=42)
+    },
+    'TPOTRegressor': {
+        'estimator':
+            TPOTRegressor(generations=2,
+                          offspring_size=5,
+                          population_size=10,
+                          verbosity=2,
+                          random_state=42)
+    },
     'MLPClassifier': {
         'estimator': MLPClassifier(alpha=0.01, max_iter=1000),
         'args': {

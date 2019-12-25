@@ -1,9 +1,7 @@
 from apps.stocking.actions.categorify import y_categorifier
 from apps.stocking.prediction import predict
 from apps.stocking.metainfo import appdir, TRAINED_ROOT
-from apps.stocking.estimators import estimators
-
-from sklearn.base import is_classifier
+from apps.stocking.estimators import estimators, is_clfr
 
 import time
 import json
@@ -23,11 +21,12 @@ def save_infos(infos, estimator, ds, xy, dirname='latest'):
     info_dir = TRAINED_ROOT / infos['name'] / dirname
     if not info_dir.exists():
         os.makedirs(info_dir)
-    est_path = info_dir / 'estimator.pkl'
-    infos['type'] = 'classify' if is_classifier(estimator) else 'regress'
+    infos['type'] = 'classify' if is_clfr(estimator) else 'regress'
 
-    with open(est_path, 'wb') as f:
-        pickle.dump(estimator, f)
+    # est_path = info_dir / 'estimator.pkl'
+    # with open(est_path, 'wb') as f:
+    #     pickle.dump(estimator, f)
+
     with open(info_dir / 'infos.json', 'w') as f:
         json.dump(infos, f, ensure_ascii=False, sort_keys=True, indent=2)
     ds.to_csv(info_dir / 'ds.csv')

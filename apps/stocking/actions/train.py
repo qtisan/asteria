@@ -1,11 +1,17 @@
 import numpy as np
 import moment
 from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.base import is_classifier, is_regressor
 
 from apps.stocking.metainfo import logger
+from apps.stocking.estimators import is_clfr
+
+# TODO: Ignore future warning, as https://github.com/EpistasisLab/tpot/issues/981
+import warnings
+warnings.filterwarnings("ignore")
+from tpot.base import TPOTBase
 
 
+# This fit with tpot.
 def fit(x,
         ys,
         estimator,
@@ -16,14 +22,14 @@ def fit(x,
         pre_process_args={},
         test_size=0.1,
         random_state=29,
-        regress_col_index=2,
+        regress_col_index=1,
         classify_col_index=0,
         t_t_split=train_test_split,
         *args,
         **kwargs):
 
-    col_index = classify_col_index if is_classifier(estimator) else (
-        regress_col_index if is_regressor(estimator) else None)
+    col_index = classify_col_index if is_clfr(estimator) else regress_col_index
+
     if col_index is None:
         raise 'Estimator <{0}> error, not Classifier or Regressor!'.format(
             str(estimator))

@@ -21,8 +21,11 @@ import pandas as pd
 # from sklearn.gaussian_process.kernels \
 #     import RBF, WhiteKernel, RationalQuadratic, ExpSineSquared, DotProduct, ConstantKernel as C
 # from sklearn.base import is_classifier, is_regressor
+import warnings
+warnings.filterwarnings("ignore")
 
-l1 = [12, 3, 4, 5]
-l2 = [43, 1, 221]
+from tpot import TPOTClassifier, TPOTRegressor
+from tpot.base import TPOTBase
+tp = TPOTClassifier(generations=5, population_size=50, verbosity=2, random_state=42)
 
-print(l1 + l2)
+print(isinstance(tp, TPOTBase))

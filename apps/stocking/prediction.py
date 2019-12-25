@@ -4,10 +4,8 @@ import json
 import re
 
 from apps.stocking.actions import train, fetch, make, extends, split, preprocess
-from apps.stocking.estimators import estimators
+from apps.stocking.estimators import estimators, is_clfr
 from apps.stocking.metainfo import logger
-
-from sklearn.base import is_classifier
 
 import numpy as np
 import pandas as pd
@@ -135,8 +133,8 @@ def predict(infos,
 
     # prepare estimator
     est_info = estimators[infos['estimator']]
-    estimator, param_grid, preproc, preproc_args = est_info['estimator'], est_info[
-        'args'], None, {}
+    estimator, param_grid, preproc, preproc_args = est_info[
+        'estimator'], est_info['args'] if 'args' in est_info else None, None, {}
     if 'preproc' in est_info:
         pprc = est_info['preproc']
         if isinstance(pprc, dict):
@@ -198,7 +196,7 @@ def predict(infos,
             y_latest=y_latest,
             y_pred=y_pred,
             y_dict=y_dict,
-            is_clf=is_classifier(best_estimator))
+            is_clf=is_clfr(best_estimator))
         infos['results']['latest_prediction'] = lp
         val = (*val, lp)
 

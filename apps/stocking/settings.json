@@ -33,9 +33,15 @@
         "sz002690"
     ],
     "features": [
-        "close_chg_1",
         "diff",
+        "diff_chg_1",
+        "diff_chg_2",
+        "diff_chg_3",
         "dea",
+        "dea_chg_1",
+        "dea_chg_2",
+        "dea_chg_3",
+        "dea_chg_5",
         "macd",
         "macd_chg_1",
         "macd_chg_2",
@@ -43,8 +49,8 @@
         "macd_chg_5"
     ],
     "features_all": false,
-    "past_days": 5,
-    "future_days": 5,
+    "past_days": 10,
+    "future_days": 3,
     "test_size": 0.08,
     "random_state": 0,
     "feature_pows": [
@@ -59,7 +65,7 @@
         10
     ],
     "zeros_copy_days": 10,
-    "estimator": "RandomForestClassifier",
+    "estimator": "TPOTClassifier",
     "estimator_default": true,
     "y_dict": [
         {
