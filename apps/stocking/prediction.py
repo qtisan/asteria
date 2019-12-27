@@ -33,17 +33,9 @@ def prepare_data(infos,
                  features_all=False):
     # making data x y
     if features_all:
-        f_all = []
-        for pow_i in infos['feature_pows']:
-            powed_fs = np.char.add(feature_keys, '__{0}'.format(pow_i))
-            f_all = np.concatenate((f_all, powed_fs))
-        for chg_i in infos['feature_chgs']:
-            chged_fs = np.char.add(feature_keys, '_chg_{0}'.format(chg_i))
-            f_all = np.concatenate((f_all, chged_fs))
-
-        infos['features'] = f_all.tolist()
-    logger.debug('All features listed: \n')
-    logger.debug(str(infos['features']))
+        infos['features'] = list(ds.keys().values)
+    logger.debug('Used features listed: \n')
+    logger.debug(infos['features'])
 
     df_x, df_ys, df_x_latest, df_ys_latest = \
         make.make_xy(ds, return_Xy=True, to_numpy=False, categorify=categorify_y, **infos)
@@ -59,7 +51,7 @@ def prepare_data(infos,
 
 
 def make_latest(future_days, index, y_latest, y_pred, y_dict, is_clf):
-    fds = '未来{0}天'.format(future_days)
+    fds = '{0}天'.format(future_days)
     vls = lambda y: [(y_dict[int(v)]['name'] if is_clf else '{0:.2f}'.format(v))
                      for v in y]
     y_pred_names = np.char.add(fds, vls(preprocess.rav(y_pred)))

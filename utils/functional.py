@@ -53,3 +53,15 @@ def move_up(arr: np.ndarray, n: int):
 
 def move_down(arr: np.ndarray, n: int):
     return np.concatenate((np.repeat([arr[0]], n, axis=0), arr[0:len(arr) - n]))
+
+
+def hooked(data, hooks=None):
+    if hooks is not None:
+        if isinstance(hooks, (list, tuple)):
+            for hook in [h for h in hooks if callable(h)]:
+                data = hook(data)
+        elif callable(hooks):
+            data = hooks(data)
+        else:
+            pass
+    return data

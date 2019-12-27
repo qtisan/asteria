@@ -33,11 +33,11 @@ def is_clfr(estimator):
 estimators = {
     'TPOTClassifier': {
         'estimator':
-            TPOTClassifier(generations=2,
-                           offspring_size=5,
-                           population_size=10,
+            TPOTClassifier(generations=2000,
+                           population_size=500,
                            verbosity=2,
-                           random_state=42)
+                           random_state=42,
+                           max_time_mins=60)
     },
     'TPOTRegressor': {
         'estimator':

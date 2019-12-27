@@ -21,11 +21,54 @@ import pandas as pd
 # from sklearn.gaussian_process.kernels \
 #     import RBF, WhiteKernel, RationalQuadratic, ExpSineSquared, DotProduct, ConstantKernel as C
 # from sklearn.base import is_classifier, is_regressor
-import warnings
-warnings.filterwarnings("ignore")
 
-from tpot import TPOTClassifier, TPOTRegressor
-from tpot.base import TPOTBase
-tp = TPOTClassifier(generations=5, population_size=50, verbosity=2, random_state=42)
+from typing import TypeVar
+from abc import ABCMeta, abstractmethod
 
-print(isinstance(tp, TPOTBase))
+
+class Grand(metaclass=ABCMeta):
+    @abstractmethod
+    def say(self):
+        pass
+
+
+class Father(Grand):
+    def get_fn(self):
+        return 'Zhang'
+
+    def get_name(self):
+        return 'Taoni'
+
+
+class Child(Father):
+    def say(self):
+        return 'i am child.'
+
+    def get_name(self):
+        return 'Bu'
+
+
+T = TypeVar('T')
+
+
+def who(f: T) -> None:
+    if isinstance(f, str):
+        print(f)
+    else:
+        print(f.get_fn())
+
+
+def create_grand():
+    class GA(Grand):
+        def say(self):
+            print('i am grand.')
+
+    return GA()
+
+
+zb = Child()
+
+who(zb)
+who('Li')
+ga = create_grand()
+ga.say()
