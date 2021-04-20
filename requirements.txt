@@ -33,7 +33,7 @@ pandas==0.25.3
 Pillow==6.2.1
 pluggy==0.13.1
 psutil==5.6.7
-py==1.8.0
+py==1.10.0
 PyExecJS==1.5.1
 pylint==2.4.4
 pynisher==0.5.0
